@@ -10,13 +10,11 @@ async function main() {
 
 //连接成功回调
 main().then(() => {
-  console.log(123)
   //...
   
 })
 
 //连接失败回调
 main().catch(() => {
-  console.log(1234)
   //...
 });

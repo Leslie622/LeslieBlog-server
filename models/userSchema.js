@@ -10,14 +10,4 @@ const UserSchema = new mongoose.Schema({
   sex: Number, //性别 0:男  1：女
 });
 
-const User = mongoose.model("User",UserSchema)
-
-User.create({
-  userName: "lyf", //用户名
-  userPwd: "123456", //用户密码，md5加密
-  userEmail: "1234545", //用户邮箱
-  mobile: "123123123", //手机号
-  sex: 0, //性别 0:男  1：女
-}).then((r) => {
-  console.log(r)
-});
+module.exports = mongoose.model("User", UserSchema);
