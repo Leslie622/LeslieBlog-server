@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //路由
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
 
 // 捕捉404
 app.use(function(req, res, next) {
