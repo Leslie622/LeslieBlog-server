@@ -28,6 +28,7 @@ router.post("/login", async function (req, res) {
           message: "登录成功",
           data: {
             ...userInfo,
+            password: null, //不返回密码
             token,
           },
         });
