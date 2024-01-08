@@ -8,6 +8,7 @@ const jwtConfig = require("./config/jwt");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+const menuRouter = require("./routes/menu");
 
 const app = express();
 
@@ -25,16 +26,17 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 //jwt验证
-app.use(
-  jwt({
-    secret: jwtConfig.SECRET_KEY,
-    algorithms: ["HS256"],
-  }).unless({ path: ["/api/users/login", "/api/users/register"] })
-);
+// app.use(
+//   jwt({
+//     secret: jwtConfig.SECRET_KEY,
+//     algorithms: ["HS256"],
+//   }).unless({ path: ["/api/users/login", "/api/users/register"] })
+// );
 
 //路由
 app.use("/", indexRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/menu", menuRouter);
 
 // 捕捉404
 app.use(function (req, res, next) {
