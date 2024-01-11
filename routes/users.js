@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const User = require("../models/userSchema");
+const Role = require("../models/roleSchema");
 const utils = require("../utils/index");
 const jwt = require("jsonwebtoken");
 const jwtConfig = require("../config/jwt");
@@ -55,11 +56,39 @@ router.post("/login", async function (req, res) {
   });
 });
 
+// User.findOne({ account })
+// .populate({
+//   path: "roleId",
+//   populate: [
+//     {
+//       path: "permissionList",
+//       model: "Menu",
+//     },
+//     {
+//       path: "menuList",
+//       model: "Menu",
+//     },
+//   ],
+// })
+// .then((user) => {
+//   console.log(user);
+//   return res.send({
+//     status: 200,
+//     message: "注册成功",
+//     data: user,
+//   });
+//   // 处理查询结果
+// })
+// .catch((err) => {
+//   console.error(err);
+//   // 处理错误
+// });
+
 /* 用户注册 */
 router.post("/register", async function (req, res) {
   //获取用户信息
   let { account, password } = req.body;
-  //检查用户名是否重复
+  // 检查用户名是否重复
   const isDuplicateAccount = await utils.checkDuplicateValue(
     User,
     "account",
@@ -76,65 +105,49 @@ router.post("/register", async function (req, res) {
   }
   //密码加密
   password = bcrypt.hashSync(password, salt);
+  //分配默认角色
+  const defaultRole = await Role.findOne({ isDefault: true });
   //创建新用户
-  User.create({
+  await User.create({
     account,
     password,
+    roleId: defaultRole._id,
   });
-  //返回数据
+  // 返回数据
   return res.send({
     status: 200,
     message: "注册成功",
-    data: {
-      account,
-    },
   });
 });
 
-/* 获取用户菜单 */
-router.get("/menuList", function (req, res) {
+/* 用户列表 */
+router.get("/getUserList", async function (req, res) {
+  const userList = await User.find().populate("roleId");
   return res.send({
     status: 200,
-    message: "获取用户菜单成功",
-    data: {
-      menuList: [
-        {
-          menuType: "list",
-          menuName: "仪表盘",
-          icon: "IconEpDataAnalysis",
-          path: "/home",
-          children: [
-            {
-              menuType: "router",
-              menuName: "文章数据",
-              path: "/home/ArticleData",
-              component: "ArticleData",
-            },
-            {
-              menuType: "router",
-              menuName: "日记数据",
-              path: "/home/DiaryData",
-              component: "DiaryData",
-            },
-          ],
-        },
-        {
-          menuType: "router",
-          menuName: "用户管理",
-          path: "/home/UserManage",
-          icon: "IconEpUser",
-          component: "UserManage",
-        },
-        {
-          menuType: "router",
-          menuName: "文章管理",
-          path: "/home/ArticleManage",
-          icon: "IconEpNotebook",
-          component: "ArticleManage",
-        },
-      ],
-    },
+    message: "获取成功",
+    data: userList,
   });
 });
 
+/* 编辑用户信息 */
+router.post("/editUser", async function (req, res) {
+  //目前只修改用户角色
+  const { id, userInfo } = req.body;
+  await User.findByIdAndUpdate(id, { $set: userInfo });
+  return res.send({
+    status: 200,
+    message: "编辑成功",
+  });
+});
+
+/* 删除用户 */
+router.post("/deleteUser", async function (req, res) {
+  const { id } = req.body;
+  await User.findByIdAndDelete(id);
+  return res.send({
+    status: 200,
+    message: "删除成功",
+  });
+});
 module.exports = router;

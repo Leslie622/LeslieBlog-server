@@ -4,8 +4,8 @@ const Role = require("../models/roleSchema");
 
 /* 新增角色 */
 router.post("/createRole", async function (req, res) {
-  const { roleName, permissionList } = req.body;
-  await Role.create({ roleName, permissionList });
+  const roleInfo = req.body;
+  await Role.create(roleInfo);
   return res.send({
     status: 200,
     message: "创建成功",
@@ -15,8 +15,7 @@ router.post("/createRole", async function (req, res) {
 /* 删除角色 */
 router.post("/deleteRole", async function (req, res) {
   const { id } = req.body;
-  console.log(id)
-  await Role.deleteOne({ _id:id });
+  await Role.deleteOne({ _id: id });
   return res.send({
     status: 200,
     message: "删除成功",
@@ -36,7 +35,11 @@ router.get("/getRoleList", async function (req, res) {
 /* 编辑角色信息 */
 router.post("/editRole", async function (req, res) {
   const { id, roleInfo } = req.body;
-  console.log(id, roleInfo);
+  //如果传过来的roleInfo.isDafault为true，说明要更改默认角色
+  if (roleInfo.isDefault === true) {
+    //重置所有该字段
+    await Role.updateMany({ }, { $set: { isDefault: false } });
+  }
   await Role.findByIdAndUpdate(id, { $set: roleInfo });
   return res.send({
     status: 200,

@@ -2,7 +2,6 @@
 const checkDuplicateValue = async (model, field, value) => {
   try {
     const existingDoc = await model.findOne({ [field]: value });
-    console.log(existingDoc);
     return !!existingDoc; // 返回一个布尔值表示是否存在重复值
   } catch (error) {
     // 处理错误
