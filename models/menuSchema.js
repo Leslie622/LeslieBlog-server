@@ -20,6 +20,7 @@ const MenuSchema = new mongoose.Schema({
   menuName: String, //名称
   menuCode: String,
   path: String,
+  component: String,
   icon: String,
   parentId: mongoose.Types.ObjectId,
 });

@@ -187,13 +187,14 @@ function buildUserMenuTree(menuArray) {
 
 function transformMenuList(menuList) {
   return menuList.map((menu) => {
-    const { _id, menuType, menuName, menuCode, path, icon, parentId } = menu;
+    const { _id, menuType, menuName, menuCode, path,component, icon, parentId } = menu;
     return {
       id: _id.toString(),
       menuType,
       menuName,
       menuCode,
       path,
+      component,
       icon,
       parentId: parentId ? parentId.toString() : null,
     };
