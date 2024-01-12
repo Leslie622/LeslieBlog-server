@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Menu = require("../models/menuSchema");
-const { buildMenuTree } = require("../utils/index");
+const { buildMenuTree, transformMenuList } = require("../utils/index");
 
 /* 创建菜单 */
 router.post("/createMenu", function (req, res) {
@@ -21,7 +21,7 @@ router.post("/createMenu", function (req, res) {
 /* 获取菜单 */
 router.get("/getMenuList", async function (req, res) {
   const menuList = await Menu.find();
-  const menuTree = buildMenuTree(menuList);
+  const menuTree = buildMenuTree(transformMenuList(menuList));
   return res.send({
     status: 200,
     message: "获取成功",

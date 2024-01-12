@@ -12,77 +12,63 @@ const salt = bcrypt.genSaltSync(10);
 /* 用户登录 */
 router.post("/login", async function (req, res) {
   //获取用户信息
-  let userInfo = req.body;
+  let { account, password } = req.body;
   //查找用户
-  User.findOne({ account: userInfo.account }).then((user) => {
-    if (user) {
-      // 找到用户，检查密码是否正确
-      const isValidPwd = bcrypt.compareSync(userInfo.password, user.password);
-      if (isValidPwd) {
-        //密码正确，生成token
-        const token = jwt.sign(userInfo, jwtConfig.SECRET_KEY, {
-          expiresIn: "3h",
-        });
-        //返回用户信息
-        return res.send({
-          status: 200,
-          message: "登录成功",
-          data: {
-            ...userInfo,
-            password: null, //不返回密码
-            token,
-          },
-        });
-      } else {
-        //密码错误
-        return res.send({
-          status: 400,
-          message: "密码错误",
-          data: {
-            account: userInfo.account,
-          },
-        });
-      }
-    } else {
-      // 用户不存在
-      return res.send({
-        status: 400,
-        message: "该账号不存在，请检查您的账号是否输入正确",
-        data: {
-          account: userInfo.account,
-        },
-      });
-    }
+  const user = await User.findOne({ account });
+  //没要找到则返回错误信息
+  if (!user) {
+    return res.send({
+      status: 400,
+      message: "该账号不存在，请检查您的账号是否输入正确",
+    });
+  }
+  //检查密码是否正确
+  const isValidPwd = bcrypt.compareSync(password, user.password);
+  if (!isValidPwd) {
+    return res.send({
+      status: 400,
+      message: "密码错误",
+    });
+  }
+  // 密码验证成功，查询用户所有信息
+  const userInfo = await User.findById(user._id).populate({
+    path: "roleId",
+    populate: [
+      {
+        path: "permissionList",
+        model: "Menu",
+      },
+      {
+        path: "menuList",
+        model: "Menu",
+      },
+    ],
+  });
+  // 生成权限列表
+  const permissionList = [];
+  userInfo.roleId.permissionList.forEach((item) => {
+    permissionList.push(item.menuCode);
+  });
+  // 生成菜单树
+  const menuList = utils.transformMenuList(userInfo.roleId.menuList);
+  const menuTree = utils.buildUserMenuTree(menuList);
+  //生成token
+  const token = jwt.sign({ account, password }, jwtConfig.SECRET_KEY, {
+    expiresIn: "3h",
+  });
+  //返回数据
+  return res.send({
+    status: 200,
+    message: "登录成功",
+    data: {
+      account,
+      role: userInfo.roleId.roleName,
+      permissionList,
+      menuList: menuTree,
+      token,
+    },
   });
 });
-
-// User.findOne({ account })
-// .populate({
-//   path: "roleId",
-//   populate: [
-//     {
-//       path: "permissionList",
-//       model: "Menu",
-//     },
-//     {
-//       path: "menuList",
-//       model: "Menu",
-//     },
-//   ],
-// })
-// .then((user) => {
-//   console.log(user);
-//   return res.send({
-//     status: 200,
-//     message: "注册成功",
-//     data: user,
-//   });
-//   // 处理查询结果
-// })
-// .catch((err) => {
-//   console.error(err);
-//   // 处理错误
-// });
 
 /* 用户注册 */
 router.post("/register", async function (req, res) {
