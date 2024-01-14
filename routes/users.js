@@ -31,31 +31,15 @@ router.post("/login", async function (req, res) {
     });
   }
   // 密码验证成功，查询用户所有信息
-  const userInfo = await User.findById(user._id).populate({
-    path: "roleId",
-    populate: [
-      {
-        path: "permissionList",
-        model: "Menu",
-      },
-      {
-        path: "menuList",
-        model: "Menu",
-      },
-    ],
-  });
-  // 生成权限列表
-  const permissionList = [];
-  userInfo.roleId.permissionList.forEach((item) => {
-    permissionList.push(item.menuCode);
-  });
-  // 生成菜单树
-  const menuList = utils.transformMenuList(userInfo.roleId.menuList);
-  const menuTree = utils.buildUserMenuTree(menuList);
+  const userInfo = await User.findById(user._id).populate("roleId");
   //生成token
-  const token = jwt.sign({ account, password }, jwtConfig.SECRET_KEY, {
-    expiresIn: "3h",
-  });
+  const token = jwt.sign(
+    { account, password, id: userInfo._id },
+    jwtConfig.SECRET_KEY,
+    {
+      expiresIn: "3h",
+    }
+  );
   //返回数据
   return res.send({
     status: 200,
@@ -63,8 +47,6 @@ router.post("/login", async function (req, res) {
     data: {
       account,
       role: userInfo.roleId.roleName,
-      permissionList,
-      menuList: menuTree,
       token,
     },
   });
@@ -106,6 +88,42 @@ router.post("/register", async function (req, res) {
   });
 });
 
+/* 获取用户菜单及权限 */
+router.get("/getPermission", async function (req, res) {
+  //获取到token中保存的用户全量信息
+  const { id } = req.auth;
+  //根据用户id查询用户信息
+  const userInfo = await User.findById(id).populate({
+    path: "roleId",
+    populate: [
+      {
+        path: "permissionList",
+        model: "Menu",
+      },
+      {
+        path: "menuList",
+        model: "Menu",
+      },
+    ],
+  });
+  // 生成权限列表
+  const permissionList = [];
+  userInfo.roleId.permissionList.forEach((item) => {
+    permissionList.push(item.menuCode);
+  });
+  // 生成菜单树
+  const menuList = utils.transformMenuList(userInfo.roleId.menuList);
+  const menuTree = utils.buildUserMenuTree(menuList);
+  return res.send({
+    status: 200,
+    message: "获取用户菜单权限成功",
+    data: {
+      permission: permissionList,
+      menu: menuTree,
+    },
+  });
+});
+
 /* 用户列表 */
 router.get("/getUserList", async function (req, res) {
   const userList = await User.find().populate("roleId");
@@ -136,4 +154,5 @@ router.post("/deleteUser", async function (req, res) {
     message: "删除成功",
   });
 });
+
 module.exports = router;

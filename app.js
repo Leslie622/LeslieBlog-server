@@ -27,12 +27,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 //jwt验证
-// app.use(
-//   jwt({
-//     secret: jwtConfig.SECRET_KEY,
-//     algorithms: ["HS256"],
-//   }).unless({ path: ["/api/users/login", "/api/users/register"] })
-// );
+app.use(
+  jwt({
+    secret: jwtConfig.SECRET_KEY,
+    algorithms: ["HS256"],
+  }).unless({ path: ["/api/users/login", "/api/users/register"] })
+);
 
 //路由
 app.use("/", indexRouter);
