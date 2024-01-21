@@ -20,6 +20,7 @@ router.post("/login", async function (req, res) {
     return res.send({
       status: 400,
       message: "该账号不存在，请检查您的账号是否输入正确",
+      data: {},
     });
   }
   //检查密码是否正确
@@ -28,6 +29,7 @@ router.post("/login", async function (req, res) {
     return res.send({
       status: 400,
       message: "密码错误",
+      data: {},
     });
   }
   // 密码验证成功，查询用户所有信息
@@ -85,6 +87,7 @@ router.post("/register", async function (req, res) {
   return res.send({
     status: 200,
     message: "注册成功",
+    data: {},
   });
 });
 
@@ -126,11 +129,15 @@ router.get("/getPermission", async function (req, res) {
 
 /* 用户列表 */
 router.get("/getUserList", async function (req, res) {
-  const userList = await User.find().populate("roleId");
+  const userList = await User.find();
   return res.send({
     status: 200,
     message: "获取成功",
-    data: userList,
+    data: userList.map((item) => ({
+      id: item._id,
+      account: item.account,
+      roleId: item.roleId,
+    })),
   });
 });
 
@@ -142,6 +149,7 @@ router.post("/editUser", async function (req, res) {
   return res.send({
     status: 200,
     message: "编辑成功",
+    data: {},
   });
 });
 
@@ -152,6 +160,7 @@ router.post("/deleteUser", async function (req, res) {
   return res.send({
     status: 200,
     message: "删除成功",
+    data: {},
   });
 });
 
