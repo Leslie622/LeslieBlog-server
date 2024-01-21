@@ -8,7 +8,8 @@ router.post("/createRole", async function (req, res) {
   await Role.create(roleInfo);
   return res.send({
     status: 200,
-    message: "创建成功",
+    message: "创建角色成功",
+    data: {},
   });
 });
 
@@ -19,6 +20,7 @@ router.post("/deleteRole", async function (req, res) {
   return res.send({
     status: 200,
     message: "删除成功",
+    data: {},
   });
 });
 
@@ -28,22 +30,29 @@ router.get("/getRoleList", async function (req, res) {
   return res.send({
     status: 200,
     message: "查询成功",
-    data: roleList,
+    data: roleList.map((item) => ({
+      id: item._id,
+      roleName: item.roleName,
+      permissionList: item.permissionList,
+      menuList: item.menuList,
+      isDefault: item.isDefault,
+    })),
   });
 });
 
 /* 编辑角色信息 */
 router.post("/editRole", async function (req, res) {
-  const { id, roleInfo } = req.body;
+  const { id, ...roleInfo } = req.body;
   //如果传过来的roleInfo.isDafault为true，说明要更改默认角色
   if (roleInfo.isDefault === true) {
     //重置所有该字段
-    await Role.updateMany({ }, { $set: { isDefault: false } });
+    await Role.updateMany({}, { $set: { isDefault: false } });
   }
   await Role.findByIdAndUpdate(id, { $set: roleInfo });
   return res.send({
     status: 200,
     message: "编辑成功",
+    data: {},
   });
 });
 

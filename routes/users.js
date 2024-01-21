@@ -47,8 +47,12 @@ router.post("/login", async function (req, res) {
     status: 200,
     message: "登录成功",
     data: {
+      id: userInfo._id,
       account,
-      role: userInfo.roleId.roleName,
+      role: {
+        roleId: userInfo.roleId._id,
+        roleName: userInfo.roleId.roleName,
+      },
       token,
     },
   });
@@ -59,18 +63,11 @@ router.post("/register", async function (req, res) {
   //获取用户信息
   let { account, password } = req.body;
   // 检查用户名是否重复
-  const isDuplicateAccount = await utils.checkDuplicateValue(
-    User,
-    "account",
-    account
-  );
-  if (isDuplicateAccount) {
+  const user = await User.findOne({ account });
+  if (user) {
     return res.send({
       status: 400,
       message: "注册失败，该用户名已被注册",
-      data: {
-        account,
-      },
     });
   }
   //密码加密
@@ -144,8 +141,8 @@ router.get("/getUserList", async function (req, res) {
 /* 编辑用户信息 */
 router.post("/editUser", async function (req, res) {
   //目前只修改用户角色
-  const { id, userInfo } = req.body;
-  await User.findByIdAndUpdate(id, { $set: userInfo });
+  const { id, roleId } = req.body;
+  await User.findByIdAndUpdate(id, { roleId });
   return res.send({
     status: 200,
     message: "编辑成功",
