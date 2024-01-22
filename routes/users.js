@@ -113,7 +113,7 @@ router.get("/getPermission", async function (req, res) {
   });
   // 生成菜单树
   const menuList = utils.transformMenuList(userInfo.roleId.menuList);
-  const menuTree = utils.buildUserMenuTree(menuList);
+  const menuTree = utils.buildMenuTree(menuList);
   return res.send({
     status: 200,
     message: "获取用户菜单权限成功",

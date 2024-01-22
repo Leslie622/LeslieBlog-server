@@ -1,4 +1,4 @@
-/* 生成菜单树 */
+/* 根据parentId，以children字段生成菜单树 */
 function buildMenuTree(menuArray) {
   const menuMap = {};
   const menuTree = [];
@@ -25,24 +25,19 @@ function buildMenuTree(menuArray) {
   return menuTree;
 }
 
-/* 生成用户菜单树：去除不必要字段 */
-function buildUserMenuTree(menuArray) {
-  const menuTree = buildMenuTree(menuArray);
-  // 去除 id 和 parentId 字段
-  function removeFields(menu) {
-    delete menu.id;
-    delete menu.parentId;
-    menu.children.forEach(removeFields);
-  }
-
-  menuTree.forEach(removeFields);
-
-  return menuTree
-}
-
+/* 转换菜单数据格式 */
 function transformMenuList(menuList) {
   return menuList.map((menu) => {
-    const { _id, menuType, menuName, menuCode, path,component, icon, parentId } = menu;
+    const {
+      _id,
+      menuType,
+      menuName,
+      menuCode,
+      path,
+      component,
+      icon,
+      parentId,
+    } = menu;
     return {
       id: _id.toString(),
       menuType,
@@ -59,5 +54,4 @@ function transformMenuList(menuList) {
 module.exports = {
   transformMenuList,
   buildMenuTree,
-  buildUserMenuTree
 };
