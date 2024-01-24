@@ -10,5 +10,7 @@ const UserSchema = new mongoose.Schema({
     ref: "Role",
     default: null,
   },
+  avatar: String,
+  introduce: String,
 });
 module.exports = mongoose.model("User", UserSchema);

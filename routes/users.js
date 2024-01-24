@@ -79,6 +79,8 @@ router.post("/register", async function (req, res) {
     account,
     password,
     roleId: defaultRole._id,
+    avatar: "",
+    introduce: "",
   });
   // 返回数据
   return res.send({
@@ -140,9 +142,8 @@ router.get("/getUserList", async function (req, res) {
 
 /* 编辑用户信息 */
 router.post("/editUser", async function (req, res) {
-  //目前只修改用户角色
-  const { id, roleId } = req.body;
-  await User.findByIdAndUpdate(id, { roleId });
+  const { id, ...roleInfo } = req.body;
+  await User.findByIdAndUpdate(id, roleInfo);
   return res.send({
     status: 200,
     message: "编辑成功",
