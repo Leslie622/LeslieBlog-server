@@ -35,7 +35,6 @@ router.post("/login", async function (req, res) {
   }
   // 密码验证成功，查询用户所有信息
   const userInfo = await User.findById(user._id).populate("roleId");
-  console.log(userInfo);
   //生成token
   const token = jwt.sign({ account, password, id: userInfo._id }, jwtConfig.SECRET_KEY, {
     expiresIn: "3h",
@@ -144,7 +143,7 @@ router.get("/getUserList", async function (req, res) {
 /* 获取当前用户信息 */
 router.get("/getUserInfo", async function (req, res) {
   const { id } = req.auth;
-  const userInfo = await User.findById(id);
+  const userInfo = await User.findById(id).populate("roleId");
   console.log(userInfo);
   return res.send({
     status: 200,
