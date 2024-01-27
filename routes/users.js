@@ -6,6 +6,7 @@ const Role = require("../models/roleSchema");
 const utils = require("../utils/index");
 const jwt = require("jsonwebtoken");
 const jwtConfig = require("../config/jwt");
+const { deleteObjectCos } = require("../tx-cos/index");
 //设置加密强度
 const salt = bcrypt.genSaltSync(10);
 
@@ -34,14 +35,11 @@ router.post("/login", async function (req, res) {
   }
   // 密码验证成功，查询用户所有信息
   const userInfo = await User.findById(user._id).populate("roleId");
+  console.log(userInfo);
   //生成token
-  const token = jwt.sign(
-    { account, password, id: userInfo._id },
-    jwtConfig.SECRET_KEY,
-    {
-      expiresIn: "3h",
-    }
-  );
+  const token = jwt.sign({ account, password, id: userInfo._id }, jwtConfig.SECRET_KEY, {
+    expiresIn: "3h",
+  });
   //返回数据
   return res.send({
     status: 200,
@@ -54,6 +52,8 @@ router.post("/login", async function (req, res) {
         roleName: userInfo.roleId.roleName,
       },
       token,
+      avatar: userInfo.avatar,
+      introduce: userInfo.introduce,
     },
   });
 });
@@ -129,6 +129,7 @@ router.get("/getPermission", async function (req, res) {
 /* 用户列表 */
 router.get("/getUserList", async function (req, res) {
   const userList = await User.find();
+  console.log(userList)
   return res.send({
     status: 200,
     message: "获取成功",
@@ -140,9 +141,39 @@ router.get("/getUserList", async function (req, res) {
   });
 });
 
+/* 获取当前用户信息 */
+router.get("/getUserInfo", async function (req, res) {
+  const { id } = req.auth;
+  const userInfo = await User.findById(id);
+  return res.send({
+    status: 200,
+    message: "获取成功",
+    data: {
+      id: userInfo._id,
+      account,
+      role: {
+        roleId: userInfo.roleId._id,
+        roleName: userInfo.roleId.roleName,
+      },
+      avatar: userInfo.avatar,
+      introduce: userInfo.introduce,
+    },
+  });
+});
+
 /* 编辑用户信息 */
 router.post("/editUser", async function (req, res) {
   const { id, ...roleInfo } = req.body;
+  //如果编辑了头像，则删除旧头像
+  if (roleInfo.avatar) {
+    const user = await User.findById(id);
+    //获取旧头像path
+    const { avatar } = user;
+    //删除
+    try {
+      await deleteObjectCos(avatar);
+    } catch (error) {}
+  }
   await User.findByIdAndUpdate(id, roleInfo);
   return res.send({
     status: 200,

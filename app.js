@@ -10,11 +10,12 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const menuRouter = require("./routes/menu");
 const roleRouter = require("./routes/role");
+const uploadsRouter = require("./routes/uploads");
 
 const app = express();
 
 //数据库
-require("./config/db");
+require("./db/index");
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -39,6 +40,7 @@ app.use("/", indexRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/menu", menuRouter);
 app.use("/api/role", roleRouter);
+app.use("/api/uploads", uploadsRouter);
 
 // 捕捉404
 app.use(function (req, res, next) {
