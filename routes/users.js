@@ -129,7 +129,7 @@ router.get("/getPermission", async function (req, res) {
 /* 用户列表 */
 router.get("/getUserList", async function (req, res) {
   const userList = await User.find();
-  console.log(userList)
+  console.log(userList);
   return res.send({
     status: 200,
     message: "获取成功",
@@ -145,12 +145,13 @@ router.get("/getUserList", async function (req, res) {
 router.get("/getUserInfo", async function (req, res) {
   const { id } = req.auth;
   const userInfo = await User.findById(id);
+  console.log(userInfo);
   return res.send({
     status: 200,
     message: "获取成功",
     data: {
       id: userInfo._id,
-      account,
+      account: userInfo.account,
       role: {
         roleId: userInfo.roleId._id,
         roleName: userInfo.roleId.roleName,
