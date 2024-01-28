@@ -127,15 +127,17 @@ router.get("/getPermission", async function (req, res) {
 
 /* 用户列表 */
 router.get("/getUserList", async function (req, res) {
-  const userList = await User.find();
-  console.log(userList);
+  const userList = await User.find().populate("roleId");
   return res.send({
     status: 200,
     message: "获取成功",
     data: userList.map((item) => ({
       id: item._id,
       account: item.account,
-      roleId: item.roleId,
+      role: {
+        roleId:item.roleId._id,
+        roleName:item.roleId.roleName
+      },
     })),
   });
 });
@@ -144,7 +146,6 @@ router.get("/getUserList", async function (req, res) {
 router.get("/getUserInfo", async function (req, res) {
   const { id } = req.auth;
   const userInfo = await User.findById(id).populate("roleId");
-  console.log(userInfo);
   return res.send({
     status: 200,
     message: "获取成功",
