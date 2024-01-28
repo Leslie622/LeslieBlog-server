@@ -7,8 +7,8 @@ const { buildMenuTree, transformMenuList } = require("../utils/index");
 router.post("/createMenu", async function (req, res) {
   //获取菜单信息
   const menuInfo = req.body;
-  //创建菜单,将parentId为0转换成null
-  if (menuInfo.parentId === 0) {
+  //创建菜单,将parentId为空转换成null
+  if (menuInfo.parentId === "") {
     menuInfo.parentId = null;
   }
   await Menu.create(menuInfo);
