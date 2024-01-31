@@ -14,7 +14,7 @@ router.post("/create", async function (req, res) {
 });
 
 /* 删除博客分类 */
-router.post("/create", async function (req, res) {
+router.post("/delete", async function (req, res) {
   const { id } = req.body;
   await blogCategory.findByIdAndDelete(id);
   return res.send({
