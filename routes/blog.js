@@ -36,7 +36,7 @@ router.post("/delete", async function (req, res) {
 });
 
 /* 查询博客列表 */
-router.post("/list", async function (req, res) {
+router.get("/list", async function (req, res) {
   const blogList = await Blog.find();
   return res.send({
     status: 200,
