@@ -4,8 +4,9 @@ const Blog = require("../models/blogSchema");
 
 /* 创建博客 */
 router.post("/create", async function (req, res) {
+  const userId = req.auth.id;
   const blogInfo = req.body;
-  await Blog.create(blogInfo);
+  await Blog.create({ ...blogInfo, author: userId });
   return res.send({
     status: 200,
     message: "创建成功",
