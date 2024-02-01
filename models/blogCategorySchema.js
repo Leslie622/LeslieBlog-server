@@ -11,4 +11,4 @@ const BlogCategorySchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("blogCategory", BlogCategorySchema);
+module.exports = mongoose.model("BlogCategory", BlogCategorySchema);

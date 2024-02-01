@@ -12,6 +12,7 @@ const menuRouter = require("./routes/menu");
 const roleRouter = require("./routes/role");
 const uploadsRouter = require("./routes/uploads");
 const blogCategory = require("./routes/blogCategory");
+const blog = require("./routes/blog");
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/menu", menuRouter);
 app.use("/api/role", roleRouter);
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/blogCategory", blogCategory);
+app.use("/api/blog", blog);
 
 // 捕捉404
 app.use(function (req, res, next) {
