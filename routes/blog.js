@@ -73,6 +73,30 @@ router.post("/list", async function (req, res) {
     });
 });
 
+/* 查询单篇博客 */
+router.post("/singleBlog", async function (req, res) {
+  const { blogId } = req.body;
+  const blog = await Blog.findById(blogId);
+  return res.send({
+    status: 200,
+    message: "查询成功",
+    data: {
+      id: blog._id,
+      title: blog.title,
+      abstract: blog.abstract,
+      cover: blog.cover,
+      content: blog.content,
+      category: blog.category,
+      author: blog.author,
+      views: blog.views,
+      isOriginal: blog.isOriginal,
+      isSticky: blog.isSticky,
+      createTime: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
+      updateTime: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+    },
+  });
+});
+
 /* 规则查找 */
 const findByRules = async (authorId, pageSize, pageNum, category, sortArr) => {
   //默认只能查找该作者自己的博客，并关联category字段
