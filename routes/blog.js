@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const moment = require("moment");
 const Blog = require("../models/blogSchema");
 
 /* 创建博客 */
@@ -37,28 +38,73 @@ router.post("/delete", async function (req, res) {
 });
 
 /* 查询博客列表 */
-router.get("/list", async function (req, res) {
-  const blogList = await Blog.find();
-  return res.send({
-    status: 200,
-    message: "查询成功",
-    data: blogList.map((blog) => {
-      return {
-        id: blog._id,
-        title: blog.title,
-        abstract: blog.abstract,
-        cover: blog.cover,
-        content: blog.content,
-        category: blog.category,
-        author: blog.author,
-        views: blog.views,
-        isOriginal: blog.isOriginal,
-        isSticky: blog.isSticky,
-        createTime: blog.createdAt,
-        updateTime: blog.updatedAt,
-      };
-    }),
-  });
+router.post("/list", async function (req, res) {
+  const { pageSize, pageNum, category, sortArr } = req.body;
+  const authorId = req.auth.id;
+  //自定义查找规则
+  findByRules(authorId, pageSize, pageNum, category, sortArr)
+    .then(({ totalCount, blogList }) => {
+      return res.send({
+        status: 200,
+        message: "查询成功",
+        data: {
+          total: totalCount,
+          blogList: blogList.map((blog) => {
+            return {
+              id: blog._id,
+              title: blog.title,
+              abstract: blog.abstract,
+              cover: blog.cover,
+              content: blog.content,
+              category: blog.category.name,
+              author: blog.author,
+              views: blog.views,
+              isOriginal: blog.isOriginal,
+              isSticky: blog.isSticky,
+              createTime: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
+              updateTime: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+            };
+          }),
+        },
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 });
+
+/* 规则查找 */
+const findByRules = async (authorId, pageSize, pageNum, category, sortArr) => {
+  //默认只能查找该作者自己的博客，并关联category字段
+  let query = Blog.find({ author: authorId }).populate("category");
+  //按照分类查找
+  if (category && category !== "") {
+    query = query.where("category").equals(category);
+  }
+  //获取文章总数
+  const countQuery = query.clone(); // 克隆查询对象，用于获取总数量
+  const totalCount = await countQuery.countDocuments(); // 获取符合条件的文档总数
+  //按照字段排序查找
+  if (sortArr && sortArr.length > 0) {
+    const sortCriteria = {};
+    for (const sortObj of sortArr) {
+      sortCriteria[sortObj.field] = sortObj.order === -1 ? -1 : 1;
+    }
+    query = query.sort(sortCriteria);
+  }
+  //分页
+  if (pageSize && pageNum) {
+    const skipAmount = pageSize * (pageNum - 1);
+    query = query.skip(skipAmount).limit(pageSize);
+  }
+  //执行查找
+  try {
+    const blogList = await query;
+    return { totalCount, blogList };
+  } catch (error) {
+    console.error("Error retrieving blog list:", error);
+    throw error;
+  }
+};
 
 module.exports = router;
