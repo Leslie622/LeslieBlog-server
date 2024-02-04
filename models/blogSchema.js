@@ -7,6 +7,7 @@ const BlogSchema = new mongoose.Schema(
     abstract: String, //摘要
     cover: String, //封面路径
     content: String, //内容
+    draft: String, //草稿
     //分类
     category: {
       type: mongoose.Types.ObjectId,
