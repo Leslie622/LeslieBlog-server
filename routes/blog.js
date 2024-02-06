@@ -3,9 +3,10 @@ var router = express.Router();
 const moment = require("moment");
 const Blog = require("../models/blogSchema");
 const Category = require("../models/blogCategorySchema");
+const checkPermission = require("../middleware/permission");
 
 /* 创建博客 */
-router.post("/create", async function (req, res) {
+router.post("/create", checkPermission("blog-create"), async function (req, res) {
   const userId = req.auth.id;
   const blogInfo = req.body;
   const blog = await Blog.create({ ...blogInfo, author: userId });
@@ -19,7 +20,7 @@ router.post("/create", async function (req, res) {
 });
 
 /* 编辑博客 */
-router.post("/edit", async function (req, res) {
+router.post("/edit", checkPermission("blog-edit"), async function (req, res) {
   const { id, ...blogInfo } = req.body;
   await Blog.findByIdAndUpdate(id, blogInfo);
   return res.send({
@@ -30,7 +31,7 @@ router.post("/edit", async function (req, res) {
 });
 
 /* 删除博客 */
-router.post("/delete", async function (req, res) {
+router.post("/delete", checkPermission("blog-delete"), async function (req, res) {
   const { id } = req.body;
   const blog = await Blog.findByIdAndDelete(id);
   //使该博客分类的count-1
@@ -43,7 +44,7 @@ router.post("/delete", async function (req, res) {
 });
 
 /* 查询博客列表 */
-router.post("/list", async function (req, res) {
+router.post("/list", checkPermission("blog-query"), async function (req, res) {
   const { pageSize, pageNum, category, sortArr } = req.body;
   const authorId = req.auth.id;
   //自定义查找规则

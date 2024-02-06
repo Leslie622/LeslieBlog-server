@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const Menu = require("../models/menuSchema");
 const { buildMenuTree, transformMenuList } = require("../utils/index");
+const checkPermission = require("../middleware/permission");
 
 /* 创建菜单 */
-router.post("/createMenu", async function (req, res) {
+router.post("/createMenu", checkPermission("menu-create"), async function (req, res) {
   //获取菜单信息
   const menuInfo = req.body;
   //创建菜单,将parentId为空转换成null
@@ -20,7 +21,7 @@ router.post("/createMenu", async function (req, res) {
 });
 
 /* 获取菜单 */
-router.get("/getMenuList", async function (req, res) {
+router.get("/getMenuList", checkPermission("menu-query"), async function (req, res) {
   const menuList = await Menu.find();
   const menuTree = buildMenuTree(transformMenuList(menuList));
   return res.send({
@@ -31,7 +32,7 @@ router.get("/getMenuList", async function (req, res) {
 });
 
 /* 编辑菜单 */
-router.post("/editMenu", async function (req, res) {
+router.post("/editMenu", checkPermission("menu-edit"), async function (req, res) {
   const { id, ...menuInfo } = req.body;
   await Menu.findByIdAndUpdate(id, { $set: menuInfo });
   return res.send({
@@ -42,7 +43,7 @@ router.post("/editMenu", async function (req, res) {
 });
 
 /* 删除菜单 */
-router.post("/deleteMenu", async function (req, res) {
+router.post("/deleteMenu", checkPermission("menu-delete"), async function (req, res) {
   const { id } = req.body;
   deleteMenuAndChildren(id);
   return res.send({

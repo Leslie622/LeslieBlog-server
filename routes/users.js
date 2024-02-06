@@ -7,6 +7,7 @@ const utils = require("../utils/index");
 const jwt = require("jsonwebtoken");
 const jwtConfig = require("../config/jwt");
 const { deleteObjectCos } = require("../tx-cos/index");
+const checkPermission = require("../middleware/permission");
 //设置加密强度
 const salt = bcrypt.genSaltSync(10);
 
@@ -36,7 +37,7 @@ router.post("/login", async function (req, res) {
   // 密码验证成功，查询用户所有信息
   const userInfo = await User.findById(user._id).populate("roleId");
   //生成token
-  const token = jwt.sign({ account, password, id: userInfo._id }, jwtConfig.SECRET_KEY, {
+  const token = jwt.sign({ account, password, id: userInfo._id, roleId: userInfo.roleId._id }, jwtConfig.SECRET_KEY, {
     expiresIn: "3h",
   });
   //返回数据
@@ -126,7 +127,7 @@ router.get("/getPermission", async function (req, res) {
 });
 
 /* 用户列表 */
-router.get("/getUserList", async function (req, res) {
+router.get("/getUserList",checkPermission("user-query"), async function (req, res) {
   const userList = await User.find().populate("roleId");
   return res.send({
     status: 200,
@@ -135,8 +136,8 @@ router.get("/getUserList", async function (req, res) {
       id: item._id,
       account: item.account,
       role: {
-        roleId:item.roleId._id,
-        roleName:item.roleId.roleName
+        roleId: item.roleId._id,
+        roleName: item.roleId.roleName,
       },
     })),
   });
@@ -163,7 +164,7 @@ router.get("/getUserInfo", async function (req, res) {
 });
 
 /* 编辑用户信息 */
-router.post("/editUser", async function (req, res) {
+router.post("/editUser",checkPermission("user-edit"), async function (req, res) {
   const { id, ...roleInfo } = req.body;
   //如果编辑了头像，则删除旧头像
   if (roleInfo.avatar) {
@@ -184,7 +185,7 @@ router.post("/editUser", async function (req, res) {
 });
 
 /* 删除用户 */
-router.post("/deleteUser", async function (req, res) {
+router.post("/deleteUser",checkPermission("user-delete"), async function (req, res) {
   const { id } = req.body;
   await User.findByIdAndDelete(id);
   return res.send({

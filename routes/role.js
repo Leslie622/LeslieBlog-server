@@ -1,9 +1,10 @@
 var express = require("express");
 var router = express.Router();
 const Role = require("../models/roleSchema");
+const checkPermission = require("../middleware/permission");
 
 /* 新增角色 */
-router.post("/createRole", async function (req, res) {
+router.post("/createRole",checkPermission("role-create"), async function (req, res) {
   const roleInfo = req.body;
   await Role.create(roleInfo);
   return res.send({
@@ -14,7 +15,7 @@ router.post("/createRole", async function (req, res) {
 });
 
 /* 删除角色 */
-router.post("/deleteRole", async function (req, res) {
+router.post("/deleteRole",checkPermission("role-delete"), async function (req, res) {
   const { id } = req.body;
   await Role.deleteOne({ _id: id });
   return res.send({
@@ -25,7 +26,7 @@ router.post("/deleteRole", async function (req, res) {
 });
 
 /* 查询角色列表 */
-router.get("/getRoleList", async function (req, res) {
+router.get("/getRoleList", checkPermission("role-query"), async function (req, res) {
   const roleList = await Role.find();
   return res.send({
     status: 200,
@@ -41,7 +42,7 @@ router.get("/getRoleList", async function (req, res) {
 });
 
 /* 编辑角色信息 */
-router.post("/editRole", async function (req, res) {
+router.post("/editRole",checkPermission("role-edit"), async function (req, res) {
   const { id, ...roleInfo } = req.body;
   //如果传过来的roleInfo.isDafault为true，说明要更改默认角色
   if (roleInfo.isDefault === true) {
