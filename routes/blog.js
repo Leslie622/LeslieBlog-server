@@ -2,12 +2,15 @@ var express = require("express");
 var router = express.Router();
 const moment = require("moment");
 const Blog = require("../models/blogSchema");
+const Category = require("../models/blogCategorySchema");
 
 /* 创建博客 */
 router.post("/create", async function (req, res) {
   const userId = req.auth.id;
   const blogInfo = req.body;
-  await Blog.create({ ...blogInfo, author: userId });
+  const blog = await Blog.create({ ...blogInfo, author: userId });
+  //使该博客分类的count+1
+  await Category.updateOne({ _id: blog.category }, { $inc: { count: 1 } });
   return res.send({
     status: 200,
     message: "创建成功",
@@ -29,7 +32,9 @@ router.post("/edit", async function (req, res) {
 /* 删除博客 */
 router.post("/delete", async function (req, res) {
   const { id } = req.body;
-  await Blog.findByIdAndDelete(id);
+  const blog = await Blog.findByIdAndDelete(id);
+  //使该博客分类的count-1
+  await Category.updateOne({ _id: blog.category }, { $inc: { count: -1 } });
   return res.send({
     status: 200,
     message: "删除成功",
@@ -77,7 +82,8 @@ router.post("/list", async function (req, res) {
 /* 查询单篇博客 */
 router.post("/singleBlog", async function (req, res) {
   const { blogId } = req.body;
-  const blog = await Blog.findById(blogId);
+  const blog = await Blog.findByIdAndUpdate(blogId, { $inc: { views: 1 } }, { new: true });
+  //博客浏览量+1
   return res.send({
     status: 200,
     message: "查询成功",
