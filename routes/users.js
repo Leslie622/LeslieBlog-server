@@ -164,7 +164,7 @@ router.get("/getUserInfo", async function (req, res) {
 });
 
 /* 编辑用户信息 */
-router.post("/editUser",checkPermission("user-edit"), async function (req, res) {
+router.post("/editUser", async function (req, res) {
   const { id, ...roleInfo } = req.body;
   //如果编辑了头像，则删除旧头像
   if (roleInfo.avatar) {
