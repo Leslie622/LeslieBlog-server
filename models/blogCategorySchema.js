@@ -4,6 +4,11 @@ const mongoose = require("mongoose");
 const BlogCategorySchema = new mongoose.Schema({
   name: String, //分类名称
   introduce: String, //分类介绍
+  //分类所属人
+  author: {
+    type: mongoose.Types.ObjectId,
+    ref: "User",
+  },
   //该分类博客数量
   count: {
     type: Number,

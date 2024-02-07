@@ -4,9 +4,10 @@ const BlogCategory = require("../models/blogCategorySchema");
 const checkPermission = require("../middleware/permission");
 
 /* 创建博客分类 */
-router.post("/create",checkPermission("blogCategory-create"), async function (req, res) {
+router.post("/create", checkPermission("blogCategory-create"), async function (req, res) {
+  const userId = req.auth.id;
   const categoryInfo = req.body;
-  await BlogCategory.create(categoryInfo);
+  await BlogCategory.create({ ...categoryInfo, author: userId });
   return res.send({
     status: 200,
     message: "创建博客分类成功",
@@ -15,7 +16,7 @@ router.post("/create",checkPermission("blogCategory-create"), async function (re
 });
 
 /* 删除博客分类 */
-router.post("/delete", checkPermission("blogCategory-delete"),async function (req, res) {
+router.post("/delete", checkPermission("blogCategory-delete"), async function (req, res) {
   const { id } = req.body;
   await BlogCategory.findByIdAndDelete(id);
   return res.send({
@@ -38,14 +39,15 @@ router.post("/edit", checkPermission("blogCategory-edit"), async function (req, 
 
 /* 查询博客分类列表 */
 router.get("/list", async function (req, res) {
-  const categoryList = await BlogCategory.find();
+  const userId = req.auth.id;
+  const categoryList = await BlogCategory.find({ author: userId });
   return res.send({
     status: 200,
     message: "查询博客分类列表成功",
     data: categoryList.map((category) => {
       return {
         id: category._id,
-        name:category.name,
+        name: category.name,
         introduce: category.introduce,
         count: category.count,
       };
