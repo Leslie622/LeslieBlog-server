@@ -45,10 +45,10 @@ router.post("/delete", checkPermission("blog-delete"), async function (req, res)
 
 /* 查询博客列表 */
 router.post("/list", checkPermission("blog-query"), async function (req, res) {
-  const { pageSize, pageNum, category, sortArr } = req.body;
+  const { pageSize, pageNum, searchKeyword, category, sortArr } = req.body;
   const authorId = req.auth.id;
   //自定义查找规则
-  findByRules(authorId, pageSize, pageNum, category, sortArr)
+  findByRules(authorId, pageSize, pageNum, searchKeyword, category, sortArr)
     .then(({ totalCount, blogList }) => {
       return res.send({
         status: 200,
@@ -107,12 +107,17 @@ router.post("/singleBlog", async function (req, res) {
 });
 
 /* 规则查找 */
-const findByRules = async (authorId, pageSize, pageNum, category, sortArr) => {
+const findByRules = async (authorId, pageSize, pageNum, searchKeyword, category, sortArr) => {
   //默认只能查找该作者自己的博客，并关联category字段
   let query = Blog.find({ author: authorId }).populate("category");
   //按照分类查找
   if (category && category !== "") {
     query = query.where("category").equals(category);
+  }
+  // //模糊搜索
+  if (searchKeyword && searchKeyword !== "") {
+    console.log(searchKeyword);
+    query = query.where("title").regex(new RegExp(searchKeyword, "i"));
   }
   //获取文章总数
   const countQuery = query.clone(); // 克隆查询对象，用于获取总数量
