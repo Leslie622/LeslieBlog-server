@@ -127,7 +127,7 @@ router.get("/getPermission", async function (req, res) {
 });
 
 /* 用户列表 */
-router.get("/getUserList",checkPermission("user-query"), async function (req, res) {
+router.get("/getUserList", checkPermission("user-query"), async function (req, res) {
   const userList = await User.find().populate("roleId");
   return res.send({
     status: 200,
@@ -185,7 +185,7 @@ router.post("/editUser", async function (req, res) {
 });
 
 /* 删除用户 */
-router.post("/deleteUser",checkPermission("user-delete"), async function (req, res) {
+router.post("/deleteUser", checkPermission("user-delete"), async function (req, res) {
   const { id } = req.body;
   await User.findByIdAndDelete(id);
   return res.send({

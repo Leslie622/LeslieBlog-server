@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const Role = require("../models/roleSchema");
+const User = require("../models/userSchema");
 const checkPermission = require("../middleware/permission");
 
 /* 新增角色 */
@@ -27,6 +28,12 @@ router.post("/deleteRole", checkPermission("role-delete"), async function (req, 
     });
   }
   await Role.deleteOne({ _id: id });
+  //删除角色后，给所有持有该角色的用户更换成默认角色
+  const roleDeletedUsers = await User.find({ roleId: id });
+  const defaultRole = await Role.findOne({ isDefault: true });
+  roleDeletedUsers.forEach(async (item) => {
+    await User.findByIdAndUpdate(item._id, { $set: { roleId: defaultRole._id } });
+  });
   return res.send({
     status: 200,
     message: "删除成功",
