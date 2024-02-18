@@ -4,7 +4,7 @@ const Role = require("../models/roleSchema");
 const checkPermission = require("../middleware/permission");
 
 /* 新增角色 */
-router.post("/createRole",checkPermission("role-create"), async function (req, res) {
+router.post("/createRole", checkPermission("role-create"), async function (req, res) {
   const roleInfo = req.body;
   await Role.create(roleInfo);
   return res.send({
@@ -15,8 +15,17 @@ router.post("/createRole",checkPermission("role-create"), async function (req, r
 });
 
 /* 删除角色 */
-router.post("/deleteRole",checkPermission("role-delete"), async function (req, res) {
+router.post("/deleteRole", checkPermission("role-delete"), async function (req, res) {
   const { id } = req.body;
+  //不能删除默认角色
+  const role = await Role.findById(id);
+  if (role.isDefault) {
+    return res.send({
+      status: 400,
+      message: "不能删除默认角色",
+      data: {},
+    });
+  }
   await Role.deleteOne({ _id: id });
   return res.send({
     status: 200,
@@ -42,7 +51,7 @@ router.get("/getRoleList", checkPermission("role-query"), async function (req, r
 });
 
 /* 编辑角色信息 */
-router.post("/editRole",checkPermission("role-edit"), async function (req, res) {
+router.post("/editRole", checkPermission("role-edit"), async function (req, res) {
   const { id, ...roleInfo } = req.body;
   //如果传过来的roleInfo.isDafault为true，说明要更改默认角色
   if (roleInfo.isDefault === true) {
