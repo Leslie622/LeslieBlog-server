@@ -164,7 +164,7 @@ router.get("/getUserInfo", async function (req, res) {
 });
 
 /* 编辑用户信息 */
-router.post("/editUser", async function (req, res) {
+router.post("/editUser", checkPermission("user-edit"), async function (req, res) {
   const { id, ...roleInfo } = req.body;
   //如果编辑了头像，则删除旧头像
   if (roleInfo.avatar) {
@@ -177,6 +177,36 @@ router.post("/editUser", async function (req, res) {
     } catch (error) {}
   }
   await User.findByIdAndUpdate(id, roleInfo);
+  return res.send({
+    status: 200,
+    message: "编辑成功",
+    data: {},
+  });
+});
+
+/* 编辑用户个人信息 */
+router.post("/editUserInfo", async function (req, res) {
+  const { id, avatar, introduce } = req.body;
+  const userId = req.auth.id;
+  //检测是否是本人
+  if (id !== userId) {
+    return res.send({
+      status: 400,
+      message: "编辑失败",
+      data: {},
+    });
+  }
+  //如果编辑了头像，则删除旧头像
+  if (avatar) {
+    const user = await User.findById(id);
+    //获取旧头像path
+    const { avatar } = user;
+    //删除
+    try {
+      await deleteObjectCos(avatar);
+    } catch (error) {}
+  }
+  await User.findByIdAndUpdate(id, { avatar, introduce });
   return res.send({
     status: 200,
     message: "编辑成功",
