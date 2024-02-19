@@ -38,7 +38,7 @@ router.post("/login", async function (req, res) {
   const userInfo = await User.findById(user._id).populate("roleId");
   //生成token
   const token = jwt.sign({ account, password, id: userInfo._id, roleId: userInfo.roleId._id }, jwtConfig.SECRET_KEY, {
-    expiresIn: "3h",
+    expiresIn: "72h",
   });
   //返回数据
   return res.send({
