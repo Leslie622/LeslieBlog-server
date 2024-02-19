@@ -54,7 +54,7 @@ app.use(function (req, res, next) {
 // 全局错误处理
 app.use(function (err, req, res, next) {
   if (err.name === "UnauthorizedError") {
-    return res.send({ status: 401, message: "无效的token" });
+    return res.send({ status: 401, message: "登录过期，请重新登录" });
   }
   res.send({ status: 400, message: err.message });
 });
