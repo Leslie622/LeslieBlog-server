@@ -34,7 +34,9 @@ app.use(
   jwt({
     secret: jwtConfig.SECRET_KEY,
     algorithms: ["HS256"],
-  }).unless({ path: ["/api/users/login", "/api/users/register"] })
+  }).unless({
+    path: ["/api/users/login", "/api/users/register", "/api/users/getUserInfoById", "/api/blogCategory/getListByUserId", "/api/blog/getListByUserId"],
+  })
 );
 
 //路由

@@ -68,8 +68,45 @@ router.post("/list", checkPermission("blog-query"), async function (req, res) {
               views: blog.views,
               isOriginal: blog.isOriginal,
               isSticky: blog.isSticky,
-              createTime: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
-              updateTime: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+              createdAt: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
+              updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+            };
+          }),
+        },
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+});
+
+/* 根据用户id查询博客列表 */
+router.post("/getListByUserId", async function (req, res) {
+  const { pageSize, pageNum, searchKeyword, category, sortArr } = req.body;
+  const  authorId  = req.body.userId;
+  //自定义查找规则
+  findByRules(authorId, pageSize, pageNum, searchKeyword, category, sortArr)
+    .then(({ totalCount, blogList }) => {
+      return res.send({
+        status: 200,
+        message: "查询成功",
+        data: {
+          total: totalCount,
+          blogList: blogList.map((blog) => {
+            return {
+              id: blog._id,
+              title: blog.title,
+              abstract: blog.abstract,
+              cover: blog.cover,
+              content: blog.content,
+              draft: blog.draft,
+              category: blog.category.name,
+              author: blog.author,
+              views: blog.views,
+              isOriginal: blog.isOriginal,
+              isSticky: blog.isSticky,
+              createdAt: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
+              updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
             };
           }),
         },
@@ -100,8 +137,8 @@ router.post("/singleBlog", async function (req, res) {
       views: blog.views,
       isOriginal: blog.isOriginal,
       isSticky: blog.isSticky,
-      createTime: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
-      updateTime: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+      createdAt: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
+      updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
     },
   });
 });

@@ -55,4 +55,22 @@ router.get("/list", async function (req, res) {
   });
 });
 
+/* 根据用户id查询博客分类列表 */
+router.post("/getListByUserId", async function (req, res) {
+  const { userId } = req.body;
+  const categoryList = await BlogCategory.find({ author: userId });
+  return res.send({
+    status: 200,
+    message: "查询博客分类列表成功",
+    data: categoryList.map((category) => {
+      return {
+        id: category._id,
+        name: category.name,
+        introduce: category.introduce,
+        count: category.count,
+      };
+    }),
+  });
+});
+
 module.exports = router;

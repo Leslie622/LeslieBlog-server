@@ -163,6 +163,20 @@ router.get("/getUserInfo", async function (req, res) {
   });
 });
 
+/* 根据userId获取用户信息 */
+router.post("/getUserInfoById", async function (req, res) {
+  const { userId } = req.body;
+  const userInfo = await User.findById(userId);
+  return res.send({
+    status: 200,
+    message: "获取成功",
+    data: {
+      avatar: userInfo.avatar,
+      introduce: userInfo.introduce,
+    },
+  });
+});
+
 /* 编辑用户信息 */
 router.post("/editUser", checkPermission("user-edit"), async function (req, res) {
   const { id, ...roleInfo } = req.body;
