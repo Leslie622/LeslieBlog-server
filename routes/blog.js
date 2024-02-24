@@ -68,8 +68,8 @@ router.post("/list", checkPermission("blog-query"), async function (req, res) {
               views: blog.views,
               isOriginal: blog.isOriginal,
               isSticky: blog.isSticky,
-              createdAt: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
-              updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+              createdAt: moment(blog.createdAt).format("YYYY-MM-DD"),
+              updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD"),
             };
           }),
         },
@@ -105,8 +105,8 @@ router.post("/getListByUserId", async function (req, res) {
               views: blog.views,
               isOriginal: blog.isOriginal,
               isSticky: blog.isSticky,
-              createdAt: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
-              updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+              createdAt: moment(blog.createdAt).format("YYYY-MM-DD"),
+              updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD"),
             };
           }),
         },
@@ -137,8 +137,8 @@ router.post("/singleBlog", async function (req, res) {
       views: blog.views,
       isOriginal: blog.isOriginal,
       isSticky: blog.isSticky,
-      createdAt: moment(blog.createdAt).format("YYYY-MM-DD HH:mm"),
-      updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD HH:mm"),
+      createdAt: moment(blog.createdAt).format("YYYY-MM-DD"),
+      updatedAt: moment(blog.updatedAt).format("YYYY-MM-DD"),
     },
   });
 });
