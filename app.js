@@ -35,7 +35,14 @@ app.use(
     secret: jwtConfig.SECRET_KEY,
     algorithms: ["HS256"],
   }).unless({
-    path: ["/api/users/login", "/api/users/register", "/api/users/getUserInfoById", "/api/blogCategory/getListByUserId", "/api/blog/getListByUserId"],
+    path: [
+      "/api/users/login",
+      "/api/users/register",
+      "/api/users/getUserInfoById",
+      "/api/blogCategory/getListByUserId",
+      "/api/blog/getListByUserId",
+      "/api/blog/singleBlog",
+    ],
   })
 );
 
