@@ -18,11 +18,7 @@ router.post("/setInfo", async function (req, res) {
   //获取用户城市
   const { city } = ipAddress;
   //如果该ip是第一次访问则创建，否则更新并且将访问次数+1
-  await Visitor.findOneAndUpdate(
-    { ip },
-    { $inc: { visitTimes: 1 }, $setOnInsert: { location: city, system, browser, ip } },
-    { upsert: true, new: true }
-  );
+  await Visitor.findOneAndUpdate({ ip }, { $inc: { visitTimes: 1 }, $set: { location: city, system, browser, ip } }, { upsert: true, new: true });
   return res.send({
     status: 200,
     message: "成功",
