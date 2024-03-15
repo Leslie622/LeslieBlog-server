@@ -13,6 +13,7 @@ const roleRouter = require("./routes/role");
 const uploadsRouter = require("./routes/uploads");
 const blogCategory = require("./routes/blogCategory");
 const blog = require("./routes/blog");
+const visitor = require("./routes/visitor");
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use(
       "/api/blogCategory/getListByUserId",
       "/api/blog/getListByUserId",
       "/api/blog/singleBlog",
+      "/api/visitor/setInfo",
     ],
   })
 );
@@ -54,6 +56,7 @@ app.use("/api/role", roleRouter);
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/blogCategory", blogCategory);
 app.use("/api/blog", blog);
+app.use("/api/visitor", visitor);
 
 // 捕捉404
 app.use(function (req, res, next) {
