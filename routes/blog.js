@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const utils = require("../utils");
 const moment = require("moment");
 const Blog = require("../models/blogSchema");
 const Category = require("../models/blogCategorySchema");
@@ -43,19 +44,26 @@ router.post("/delete", checkPermission("blog-delete"), async function (req, res)
   });
 });
 
-/* 查询博客列表 */
+/* 查询博客列表:中后台 */
 router.post("/list", checkPermission("blog-query"), async function (req, res) {
   const { pageSize, pageNum, searchKeyword, category, sortArr } = req.body;
   const authorId = req.auth.id;
-  //自定义查找规则
-  findByRules(authorId, pageSize, pageNum, searchKeyword, category, sortArr)
-    .then(({ totalCount, blogList }) => {
+  utils
+    .MongooseFindRules({
+      schema: Blog,
+      fieldMatch: { author: authorId, category },
+      populate: ["category"],
+      page: { pageSize, pageNum },
+      searchKeyword: { key: "title", value: searchKeyword },
+      sortArr: sortArr,
+    })
+    .then(({ total, response }) => {
       return res.send({
         status: 200,
         message: "查询成功",
         data: {
-          total: totalCount,
-          blogList: blogList.map((blog) => {
+          total,
+          blogList: response.map((blog) => {
             return {
               id: blog._id,
               title: blog.title,
@@ -80,19 +88,26 @@ router.post("/list", checkPermission("blog-query"), async function (req, res) {
     });
 });
 
-/* 根据用户id查询博客列表 */
+/* 查询博客列表:前台 */
 router.post("/getListByUserId", async function (req, res) {
   const { pageSize, pageNum, searchKeyword, category, sortArr } = req.body;
-  const  authorId  = req.body.userId;
-  //自定义查找规则
-  findByRules(authorId, pageSize, pageNum, searchKeyword, category, sortArr)
-    .then(({ totalCount, blogList }) => {
+  const authorId = req.body.userId;
+  utils
+    .MongooseFindRules({
+      schema: Blog,
+      fieldMatch: { author: authorId, category },
+      populate: ["category"],
+      page: { pageSize, pageNum },
+      searchKeyword: { key: "title", value: searchKeyword },
+      sortArr: sortArr,
+    })
+    .then(({ total, response }) => {
       return res.send({
         status: 200,
         message: "查询成功",
         data: {
-          total: totalCount,
-          blogList: blogList.map((blog) => {
+          total,
+          blogList: response.map((blog) => {
             return {
               id: blog._id,
               title: blog.title,
@@ -142,44 +157,5 @@ router.post("/singleBlog", async function (req, res) {
     },
   });
 });
-
-/* 规则查找 */
-const findByRules = async (authorId, pageSize, pageNum, searchKeyword, category, sortArr) => {
-  //默认只能查找该作者自己的博客，并关联category字段
-  let query = Blog.find({ author: authorId }).populate("category");
-  //按照分类查找
-  if (category && category !== "") {
-    query = query.where("category").equals(category);
-  }
-  // //模糊搜索
-  if (searchKeyword && searchKeyword !== "") {
-    console.log(searchKeyword);
-    query = query.where("title").regex(new RegExp(searchKeyword, "i"));
-  }
-  //获取文章总数
-  const countQuery = query.clone(); // 克隆查询对象，用于获取总数量
-  const totalCount = await countQuery.countDocuments(); // 获取符合条件的文档总数
-  //按照字段排序查找
-  if (sortArr && sortArr.length > 0) {
-    const sortCriteria = {};
-    for (const sortObj of sortArr) {
-      sortCriteria[sortObj.field] = sortObj.order === -1 ? -1 : 1;
-    }
-    query = query.sort(sortCriteria);
-  }
-  //分页
-  if (pageSize && pageNum) {
-    const skipAmount = pageSize * (pageNum - 1);
-    query = query.skip(skipAmount).limit(pageSize);
-  }
-  //执行查找
-  try {
-    const blogList = await query;
-    return { totalCount, blogList };
-  } catch (error) {
-    console.error("Error retrieving blog list:", error);
-    throw error;
-  }
-};
 
 module.exports = router;

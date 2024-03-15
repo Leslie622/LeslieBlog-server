@@ -127,20 +127,39 @@ router.get("/getPermission", async function (req, res) {
 });
 
 /* 用户列表 */
-router.get("/getUserList", checkPermission("user-query"), async function (req, res) {
-  const userList = await User.find().populate("roleId");
-  return res.send({
-    status: 200,
-    message: "获取成功",
-    data: userList.map((item) => ({
-      id: item._id,
-      account: item.account,
-      role: {
-        roleId: item.roleId._id,
-        roleName: item.roleId.roleName,
-      },
-    })),
-  });
+router.post("/getUserList", checkPermission("user-query"), async function (req, res) {
+  const { pageSize, pageNum } = req.body;
+  utils
+    .MongooseFindRules({
+      schema: User,
+      fieldMatch: {},
+      populate: ["roleId"],
+      page: { pageSize, pageNum },
+      searchKeyword: {},
+      sortArr: [],
+    })
+    .then(({ total, response }) => {
+      return res.send({
+        status: 200,
+        message: "查询成功",
+        data: {
+          total,
+          userList: response.map((user) => {
+            return {
+              id: user._id,
+              account: user.account,
+              role: {
+                roleId: user.roleId._id,
+                roleName: user.roleId.roleName,
+              },
+            };
+          }),
+        },
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 });
 
 /* 获取当前用户信息 */

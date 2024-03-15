@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const utils = require("../utils/index");
 const Role = require("../models/roleSchema");
 const User = require("../models/userSchema");
 const checkPermission = require("../middleware/permission");
@@ -42,19 +43,38 @@ router.post("/deleteRole", checkPermission("role-delete"), async function (req, 
 });
 
 /* 查询角色列表 */
-router.get("/getRoleList", checkPermission("role-query"), async function (req, res) {
-  const roleList = await Role.find();
-  return res.send({
-    status: 200,
-    message: "查询成功",
-    data: roleList.map((item) => ({
-      id: item._id,
-      roleName: item.roleName,
-      permissionList: item.permissionList,
-      menuList: item.menuList,
-      isDefault: item.isDefault,
-    })),
-  });
+router.post("/getRoleList", checkPermission("role-query"), async function (req, res) {
+  const { pageSize, pageNum } = req.body;
+  utils
+    .MongooseFindRules({
+      schema: Role,
+      fieldMatch: {},
+      populate: [],
+      page: { pageSize, pageNum },
+      searchKeyword: {},
+      sortArr: [],
+    })
+    .then(({ total, response }) => {
+      return res.send({
+        status: 200,
+        message: "查询成功",
+        data: {
+          total,
+          roleList: response.map((role) => {
+            return {
+              id: role._id,
+              roleName: role.roleName,
+              permissionList: role.permissionList,
+              menuList: role.menuList,
+              isDefault: role.isDefault,
+            };
+          }),
+        },
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 });
 
 /* 编辑角色信息 */
