@@ -16,11 +16,11 @@ router.post("/setInfo", async function (req, res) {
   const query = new Ip2Region();
   const ipAddress = query.search(ip);
   //获取用户城市
-  const { city, province, country } = ipAddress;
+  const { city, province, country, isp } = ipAddress;
   //如果该ip是第一次访问则创建，否则更新并且将访问次数+1
   await Visitor.findOneAndUpdate(
     { ip },
-    { $inc: { visitTimes: 1 }, $set: { location: country + " " + province + " " + city, system, browser, ip } },
+    { $inc: { visitTimes: 1 }, $set: { location: { city, province, country, isp }, system, browser, ip } },
     { upsert: true, new: true }
   );
   return res.send({
