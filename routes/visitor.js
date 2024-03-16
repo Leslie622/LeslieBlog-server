@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const moment = require("moment");
+const utils = require("../utils/index");
 const Visitor = require("../models/visitorSchema");
 const Ip2Region = require("ip2region").default;
 
@@ -33,14 +34,22 @@ router.post("/setInfo", async function (req, res) {
 /* 获取游客列表 */
 router.post("/getVisitorList", async function (req, res) {
   const { pageSize, pageNum } = req.body;
-  findByRules(pageSize, pageNum)
-    .then(({ total, visitorList }) => {
+  utils
+    .MongooseFindRules({
+      schema: Visitor,
+      fieldMatch: {},
+      populate: [],
+      page: { pageSize, pageNum },
+      searchKeyword: {},
+      sortArr: [],
+    })
+    .then(({ total, response }) => {
       return res.send({
         status: 200,
         message: "查询成功",
         data: {
           total,
-          visitorList: visitorList.map((visitor) => {
+          visitorList: response.map((visitor) => {
             return {
               location: visitor.location,
               system: visitor.system,
@@ -58,25 +67,5 @@ router.post("/getVisitorList", async function (req, res) {
       console.error(error);
     });
 });
-
-/* 查找规则 */
-const findByRules = async (pageSize, pageNum) => {
-  let query = Visitor.find();
-  //获取游客总数
-  const countQuery = query.clone(); // 克隆查询对象，用于获取总数量
-  const total = await countQuery.countDocuments(); // 获取符合条件的文档总数
-  //分页
-  if (pageSize && pageNum) {
-    const skipAmount = pageSize * (pageNum - 1);
-    query = query.skip(skipAmount).limit(pageSize);
-  }
-  //执行查找
-  try {
-    const visitorList = await query;
-    return { total, visitorList };
-  } catch (error) {
-    throw error;
-  }
-};
 
 module.exports = router;
