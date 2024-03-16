@@ -43,19 +43,27 @@ const defaultMapData = [
 /* 请求中国地图json */
 router.get("/getCNMapJson", async function (req, res) {
   https
-    .get("https://leslie-blog-1314141789.cos.ap-nanjing.myqcloud.com/json/china.json", (response) => {
-      let data = "";
-      response.on("data", (chunk) => {
-        data += chunk;
-      });
-      response.on("end", () => {
-        return res.send({
-          status: 200,
-          message: "成功",
-          data: { chinaJson: data },
+    .get(
+      "https://leslie-blog-1314141789.cos.ap-nanjing.myqcloud.com/json/china.json",
+      {
+        headers: {
+          Referer: "https://leslieblog.site",
+        },
+      },
+      (response) => {
+        let data = "";
+        response.on("data", (chunk) => {
+          data += chunk;
         });
-      });
-    })
+        response.on("end", () => {
+          return res.send({
+            status: 200,
+            message: "成功",
+            data: { chinaJson: data },
+          });
+        });
+      }
+    )
     .on("error", (error) => {
       console.error("发生错误:", error);
     });
