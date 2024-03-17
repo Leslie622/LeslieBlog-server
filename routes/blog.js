@@ -135,8 +135,8 @@ router.post("/getListByUserId", async function (req, res) {
 /* 查询单篇博客 */
 router.post("/singleBlog", async function (req, res) {
   const { blogId } = req.body;
-  const blog = await Blog.findByIdAndUpdate(blogId, { $inc: { views: 1 } }, { new: true });
   //博客浏览量+1
+  const blog = await Blog.findByIdAndUpdate(blogId, { $inc: { views: 1 } }, { new: true, timestamps: false });
   return res.send({
     status: 200,
     message: "查询成功",
