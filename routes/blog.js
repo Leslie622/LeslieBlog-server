@@ -23,6 +23,12 @@ router.post("/create", checkPermission("blog-create"), async function (req, res)
 /* 编辑博客 */
 router.post("/edit", checkPermission("blog-edit"), async function (req, res) {
   const { id, ...blogInfo } = req.body;
+  //检测博客的category字段是否发生变化,若发生变化，则旧category的count字段-1，新的+1
+  const oldBlog = await Blog.findById(id);
+  if (oldBlog.category.toString() !== blogInfo.category) {
+    await Category.updateOne({ _id: oldBlog.category }, { $inc: { count: -1 } });
+    await Category.updateOne({ _id: blogInfo.category }, { $inc: { count: 1 } });
+  }
   await Blog.findByIdAndUpdate(id, blogInfo);
   return res.send({
     status: 200,
