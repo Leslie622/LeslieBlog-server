@@ -33,7 +33,7 @@ router.post("/setInfo", async function (req, res) {
 
 /* 获取游客列表 */
 router.post("/getVisitorList", async function (req, res) {
-  const { pageSize, pageNum } = req.body;
+  const { pageSize, pageNum, sortArr } = req.body;
   utils
     .MongooseFindRules({
       schema: Visitor,
@@ -41,7 +41,7 @@ router.post("/getVisitorList", async function (req, res) {
       populate: [],
       page: { pageSize, pageNum },
       searchKeyword: {},
-      sortArr: [],
+      sortArr: sortArr,
     })
     .then(({ total, response }) => {
       return res.send({
